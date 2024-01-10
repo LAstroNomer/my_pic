@@ -55,7 +55,7 @@ def xypl(fname, tit):
             x, y = map(float, line.split())
             xs.append(x)
             ys.append(y)
-        plt.plot(xs, ys, 'or', markersize=1, alpha=0.1)
+        plt.plot(xs, ys, 'or', markersize=1, alpha=1)
     
         xs = []
         ys = []
@@ -67,13 +67,18 @@ def xypl(fname, tit):
             xs.append(x)
             ys.append(y)
 
-        plt.plot(xs, ys, 'ob', alpha=0.1, markersize=1)
+        plt.plot(xs, ys, 'ob', alpha=1, markersize=1)
         for i in range(10):
             plt.plot([i*0.1, i*0.1], [0, 1], '--k', alpha=0.1)
             plt.plot([0, 1], [i*0.1, i*0.1], '--k', alpha=0.1)
         plt.xlim(0, 1)
         plt.ylim(0, 1)
-        plt.savefig('xy%s.png' %t)
+        if t < 10:
+            plt.savefig('xy00%s.png' %t)
+        elif t < 100:
+            plt.savefig('xy0%s.png' %t)
+        else:
+            plt.savefig('xy%s.png' %t)
         plt.cla()
         plt.close()
         t += 1
@@ -81,12 +86,13 @@ def xypl(fname, tit):
 
 #pl('N.out', 'N')
 #pl('de.out', 'dE')
-pl('e0.out', 'E_b')
+#pl('e0.out', 'E_b')
 #pl('e1.out', 'E_u')
+#pl('e2.out', 'E_all')
 #pl('u.out', 'U')
 #pl('v.out', 'V')
 #pl('m.out', 'M')
 #pl('w.out', 'W')
-#pl('dw.out', 'dW')
-#pl('p.out', 'P')
-#xypl('xy2.out', 'xy')
+###pl('dw.out', 'dW')
+pl('p.out', 'P')
+xypl('xy2.out', 'xy')

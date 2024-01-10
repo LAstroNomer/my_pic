@@ -18,22 +18,22 @@
 
     function phi0(x, y)
         real(mp) x, y, phi0
-        phi0 = g * y
+        phi0 = 0d0 !g * y
     end function
 
     function rho0(x, y)
         real(mp) x, y, rho0, r
 
         if (y >= limit) then
-            rho0 = 1.2920d0
+            rho0 = 1d0 !1.2920d0
         else
-            rho0 = 1.1455d0
+            rho0 = 1d0 !1.1455d0
         endif
     end function rho0
 
     function u0(x, y)
         real(mp) x, y, u0
-        u0 = 0.0d0 
+        u0 = 2.0d0 
     end function u0
 
     function v0(x, y)
@@ -43,8 +43,8 @@
     
     function eps0(x, y)
         real(mp) x, y, eps0, eps1, eps2
-        eps2 = 156457.0d0 !T = 0 C
-        eps1 = 176515.0d0 !T = +35 C
+        eps2 = 1.0d0 !156457.0d0 !T = 0 C
+        eps1 = eps2 !176515.0d0 !T = +35 C
 
         eps0 = eps1 + y*(eps2 - eps1)
     end function eps0
@@ -71,8 +71,8 @@
         real(mp) h, coef
 
         val = (M(:, :, 0)* eps(:,:,0) + M(:, :, 1)* eps(:,:,1))/h**2
-        coef = 4d0/3d0
-        equation_of_state = (coef - 1) * val
+        coef = 4.d0/3.d0
+        equation_of_state = (coef - 1.d0) * val
     end 
 
 
@@ -110,7 +110,7 @@
                     !theta_y = theta_y - 0.5d0
                     yk = (j + 0.5d0)*h + hy(k) !+ theta_y*h
 
-                    if (yk >= limit) then
+                    if (xk >= limit) then
                         alpha = 1
                     else 
                         alpha = 0

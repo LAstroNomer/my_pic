@@ -32,49 +32,54 @@ module first_step
 
         rho_all = (M(:, :, 0) + M(:, :, 1))/h**2
             
-        du = 0d0
-        dv = 0d0
+        du = 0.d0
+        dv = 0.d0
+        u_new = 0.d0
+        v_new = 0.d0
 
         do i = 0, n_steps-1
             do j = 1, n_steps-2
                 ! x
                 if (i == 0) then
-                    pm = (p(n_steps-1, j) + p(0, j))/2d0
+                    pm = (p(n_steps-1, j) + p(0, j))/2.d0
                 else
-                    pm = (p(i-1, j) + p(i, j))/2d0  
+                    pm = (p(i-1, j) + p(i, j))/2.d0  
                 endif
                 
                 if (i == n_steps-1) then
-                    pp = (p(n_steps-1, j) + p(0, j))/2d0
+                    pp = (p(n_steps-1, j) + p(0, j))/2.d0
                 else
-                    pp = (p(i+1, j) + p(i, j))/2d0 
+                    pp = (p(i+1, j) + p(i, j))/2.d0 
                 endif 
                 
                 du(i, j) = (pp - pm)/rho_all(i, j)
                 
 
                 ! y 
-                pm = (p(i, j-1) + p(i, j))/2d0  
+                pm = (p(i, j-1) + p(i, j))/2.d0  
                 
                 
-                pp = (p(i, j+1) + p(i, j))/2d0 
+                pp = (p(i, j+1) + p(i, j))/2.d0 
                 
-                dv(i, j) = (pp - pm)/rho_all(i, j) + g*h
+                dv(i, j) = (pp - pm)/rho_all(i, j) !+ g*h
             enddo
         enddo
 
-        dv(:, 0) = 0
-        dv(:, n_steps-1) = 0
+        dv(:, 0) = 0.0d0
+        dv(:, n_steps-1) = 0.d0
 
-        write(*, *) 'summ du', sum(du)
-        write(*, *) 'summ dv', sum(du)
+        !write(*, *) 'summ du', sum(du)
+        !write(*, *) 'summ dv', sum(du)
+
         u_new = u - tau/h * du
         v_new = v - tau/h * dv
         
-        !call borders(u_new, v_new, e_new)
+        write(*, *) 'summ du', maxval(u_new - u)
+        write(*, *) 'summ dv', maxval(v_new - v)
+        
 
         ! calculate w_i_j
-        w = rho_all * ((u**2 + v**2)/2d0 + phi) + M(:, :, 0) * e(:, :, 0)/h**2 + M(:, :, 1) * e(:, :, 1)/h**2
+        w = rho_all * ((u**2 + v**2)/2.d0 + phi) + M(:, :, 0) * e(:, :, 0)/h**2 + M(:, :, 1) * e(:, :, 1)/h**2
         write(*,*) 'Energy in', sum(w)*h**2
         dw = 0d0
 
@@ -83,27 +88,27 @@ module first_step
                 
                 ! x
                 if (i == n_steps -1) then
-                    pp = (p(n_steps-1, j) + p(0, j))/2d0
-                    A = pp *(u_new(n_steps-1, j) + u(n_steps-1, j) + u_new(0, j) + u(0, j))/4d0 
+                    pp = (p(n_steps-1, j) + p(0, j))/2.d0
+                    A = pp *(u_new(n_steps-1, j) + u(n_steps-1, j) + u_new(0, j) + u(0, j))/4.d0 
                 else
-                    pp = (p(i+1, j) + p(i, j))/2d0 
-                    A = pp *(u_new(i, j) + u(i, j) + u_new(i+1, j) + u(i+1, j))/4d0 
+                    pp = (p(i+1, j) + p(i, j))/2.d0 
+                    A = pp *(u_new(i, j) + u(i, j) + u_new(i+1, j) + u(i+1, j))/4.d0 
                 endif
                 
                 if (i == 0) then
-                    pm = (p(n_steps-1, j) + p(0, j))/2d0
-                    A = A - pm * (u_new(0, j) + u(0, j) + u_new(n_steps-1, j) + u(n_steps-1, j))/4d0    
+                    pm = (p(n_steps-1, j) + p(0, j))/2.d0
+                    A = A - pm * (u_new(0, j) + u(0, j) + u_new(n_steps-1, j) + u(n_steps-1, j))/4.d0    
                 else
-                    pm = (p(i-1, j) + p(i, j))/2d0  
-                    A = A - pm * (u_new(i, j) + u(i, j) + u_new(i-1, j) + u(i-1, j))/4d0
+                    pm = (p(i-1, j) + p(i, j))/2.d0  
+                    A = A - pm * (u_new(i, j) + u(i, j) + u_new(i-1, j) + u(i-1, j))/4.d0
                 endif
                 
 
-                pm = (p(i, j-1) + p(i, j))/2d0  
-                pp = (p(i, j+1) + p(i, j))/2d0 
+                pm = (p(i, j-1) + p(i, j))/2.d0  
+                pp = (p(i, j+1) + p(i, j))/2.d0 
 
-                B = pp * (v_new(i, j) + v(i, j) + v_new(i, j+1) + v(i, j+1))/4d0 
-                B = B - pm * (v_new(i, j) + v(i, j) + v_new(i, j-1) + v(i, j-1))/4d0    
+                B = pp * (v_new(i, j) + v(i, j) + v_new(i, j+1) + v(i, j+1))/4.d0 
+                B = B - pm * (v_new(i, j) + v(i, j) + v_new(i, j-1) + v(i, j-1))/4.d0    
 
                 dw(i, j) = (A + B)
             enddo
@@ -112,8 +117,8 @@ module first_step
         w_new = w - tau/h*dw
         write(*,*) 'Energy diff', (sum(w_new) - sum(w))*h**2
 
-        e_new(:, :, 0) = w_new/rho_all - (phi + (u_new**2 + v_new**2)/2d0) 
-        dE = 0d0
+        e_new(:, :, 0) = w_new/rho_all - (phi + (u_new**2 + v_new**2)/2.d0) 
+        dE = 0.d0
         dE = ((M(:, :, 0) + M(:, :, 1)) * e_new(:, :, 0) - M(:, :, 0) * e(:, :, 0) - M(:, :, 1) * e(:, :, 1))/(M(:,:,0) + M(:, :,1))
         !call warr(dE, 'de.out')
 
@@ -144,7 +149,7 @@ module first_step
 
         e = e_new
 
-        w_new = rho_all * ((u_new**2 + v_new**2)/2d0 + phi) + M(:, :, 0) * e(:, :, 0)/h**2 + M(:, :, 1) * e(:, :, 1)/h**2
+        w_new = rho_all * ((u_new**2 + v_new**2)/2.d0 + phi) + M(:, :, 0) * e(:, :, 0)/h**2 + M(:, :, 1) * e(:, :, 1)/h**2
 
         write(*,*) 'Energy diff', (sum(w_new) - sum(w) ) *h**2
         call warr( (w - w_new) *h**2, 'de.out')

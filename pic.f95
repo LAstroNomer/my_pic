@@ -63,6 +63,17 @@
     ! alpha = 1 более тяжелые частицы
     call particles_destribution(x, y, m_p, M, h) ! from initial conditions
 
+        open(1, file='xy1.out', position="append")
+        open(2, file='xy2.out',position="append")
+        do k = 1, n_particles
+            alpha = 0
+            if (m_p(k, alpha) < 0) then
+                alpha = 1
+            endif
+            write(alpha+1, *) x(k, alpha), y(k, alpha)
+        enddo
+        write(1, *) '#'
+        write(2, *) '#'
     ! Распределение на сетке
     M_all = M(:, :, 0) + M(:, :, 1)
     do i = 0, n_steps-1
@@ -70,27 +81,30 @@
             u_arr(i, j)   =  u0((i+0.5)*h, (j+0.5)*h) 
             v_arr(i, j)   =  v0((i+0.5)*h, (j+0.5)*h) 
             phi_arr(i, j) =  phi0((i+0.5)*h, (j+0.5)*h) 
-            !if ((i+0.5)*h >= limit) then
-            !    alpha = 1
-            !else
-            !    alpha = 0
-            !endif
+            if ((i+0.5)*h >= limit) then
+                alpha = 1
+            else
+                alpha = 0
+            endif
             ! Одно физ. в-во, удельная энергия одинакова
-            e_arr(i, j, 0)   =  eps0((i+0.5)*h, (j+0.5)*h)
-            e_arr(i, j, 1)   =  eps0((i+0.5)*h, (j+0.5)*h)
+            e_arr(i, j, alpha)   =  eps0((i+0.5)*h, (j+0.5)*h)
+            !e_arr(i, j, 1)   =  eps0((i+0.5)*h, (j+0.5)*h)
         enddo
     enddo
 
     tmax = 1
     t = 0
     do while (t <= tmax)
+        write(*, *) t
         write(*, *) '======STEP====='
         
         ! Вычисление давления
+        write(*, *) 'Min mass', minval(M(:, :, 0) + M(:, :, 1)), maxval(M(:, :, 0) + M(:, :, 1)),  minloc(M(:, :, 0) + M(:, :, 1))
         p_arr      = equation_of_state(M, e_arr, h)
         tmp_max = sqrt(maxval(u_arr**2) + maxval(v_arr**2))
+        write(*, *) 'tmp_max', tmp_max
 
-        tau = min(0.01d0*h, h/tmp_max)
+        tau = h/tmp_max !min(0.1d0*h, h/tmp_max)
         write(*, *) 'xy', minval(abs(x)), minval(abs(y)), maxval(x), maxval(y)
         write(*, *) 'tau=', tau
         t = t + tau
@@ -103,28 +117,32 @@
         
         ! Первый шаг
         call first(p_arr, e_arr, u_arr, v_arr, tau, h, M, m_p,  phi_arr)
+        tmp_max = sqrt(maxval(u_arr**2) + maxval(v_arr**2))
+        write(*, *) 'tmp_max', tmp_max
         
         ! Второй шаг
         call second(x, y, m_p,  M, e_arr, u_arr, v_arr, tau, h, phi_arr)
         
-        !open(1, file='xy1.out', position="append")
-        !open(2, file='xy2.out',position="append")
-        !do k = 1, n_particles
-        !    alpha = 0
-        !    if (m_p(k, alpha) < 0) then
-        !        alpha = 1
-        !    endif
-        !    write(alpha+1, *) x(k, alpha), y(k, alpha)
-        !enddo
-        !write(1, *) '#'
-        !write(2, *) '#'
-        !call warr(p_arr, 'p.out')
-        !call warr(u_arr, 'u.out')
-        !call warr(v_arr, 'v.out')
-        !call warr(e_arr(:, :, 0), 'e0.out')
-        !call warr(e_arr(:, :, 1), 'e1.out')
-        !call warr(w_arr, 'w.out')
-        !call warr((M(:,:,0))/h**2, 'm.out')
+        open(1, file='xy1.out', position="append")
+        open(2, file='xy2.out',position="append")
+        do k = 1, n_particles
+            alpha = 0
+            if (m_p(k, alpha) < 0) then
+                alpha = 1
+            endif
+            write(alpha+1, *) x(k, alpha), y(k, alpha)
+        enddo
+        write(1, *) '#'
+        write(2, *) '#'
+        call warr(p_arr, 'p.out')
+        call warr(u_arr, 'u.out')
+        call warr(v_arr, 'v.out')
+        call warr(e_arr(:, :, 0)*M(:, :, 0), 'e0.out')
+        call warr(e_arr(:, :, 1)*M(:, :, 1), 'e1.out')
+        call warr(e_arr(:, :, 0)*M(:, :, 0) + e_arr(:, :, 1)* M(:, :, 1), 'e2.out')
+
+        call warr(w_arr, 'w.out')
+        call warr((M(:,:,0) + M(:, :, 1))/h**2, 'm.out')
 
    enddo
 end

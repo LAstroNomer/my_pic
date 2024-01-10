@@ -46,6 +46,11 @@ module second_step
 
         i = int(x_new(k, alpha)/h)
         j = int(y_new(k, alpha)/h)
+
+        if ((i < 0) .or. (i > n_steps-1)) then
+            write(*,*) 'ALLARM!!!!!!!!!!!!!!!!!!!!!'
+            write(*, *) i, x_new(k, alpha)
+        endif
         
         N(i, j) = N(i, j) +  1
 
@@ -56,7 +61,7 @@ module second_step
     !do k =1, size(x)
     !    write(1, *) x(k), x_new(k),  y(k), y_new(k)
     !enddo
-    !call warr(N, 'N.out')
+    call warr(N, 'N.out')
 
     write(*,*) 'N sum', sum(N)
     write(*,*) 'old mass', sum(M)
@@ -122,7 +127,7 @@ module second_step
         do i = 0, n_steps-1
             do j = 0, n_steps-1
                 if (M_new(i, j, alpha) < min_mass) then
-                    e_new(i, j, alpha) = e(i, j, alpha)
+                    e_new(i, j, alpha) = 0.d0 !e(i, j, alpha)
                 else
                     e_new(i, j, alpha) = h*h*w_new(i, j, alpha)/M_new(i, j, alpha)
                     e_new(i, j, alpha) = e_new(i, j, alpha) - (u_new(i, j)**2 + v_new(i, j)**2)/2d0 - phi(i, j)
@@ -215,7 +220,7 @@ module second_step
         v11 = v_arr(i_right, j_up) 
         
         if (i_left == n_steps-1) then 
-            if (x(k, alpha) < 0.5d0) then
+            if (x(k, alpha) < 0.3d0) then
                 uk =  interp(u00, u10, u01, u11, x(k, alpha) + h/2d0, y(k, alpha) - j_down*h)
                 vk =  interp(v00, v10, v01, v11, x(k, alpha) + h/2d0, y(k, alpha) - j_down*h)
             else
@@ -244,12 +249,12 @@ module second_step
             y_new(k, alpha) = -y_new(k, alpha)
         endif
 
-        if (x_new(k, alpha) > 1) then
-            x_new(k, alpha) = x_new(k, alpha) - 1
+        if (x_new(k, alpha) >= 1) then
+            x_new(k, alpha) = x_new(k, alpha) - 1d0
         endif
 
         if (y_new(k, alpha) > 1) then
-            y_new(k, alpha) = 2 - y_new(k, alpha)
+            y_new(k, alpha) = 2d0 - y_new(k, alpha)
         endif
     enddo
         
